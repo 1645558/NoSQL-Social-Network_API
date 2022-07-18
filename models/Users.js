@@ -5,7 +5,7 @@ const userSchema = new Schema({
     username: { type: String, required: true, unique: true, trim: true },
     email: { type: String, required: true, unique: true, match: [/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/] },
     thoughts: [{ type: Schema.Types.ObjectId, ref: 'Thoughts'}],
-    friends: [{ type: Schema.Types.ObjectId, ref: 'user' }]
+    friends: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 },
 {
     toJSON: {
@@ -21,6 +21,6 @@ userSchema.virtual('friendCount').get(function () {
     return this.friends.length;
 });
 
-const User = model('user', userSchema);
+const Users = model('Users', userSchema);
 
-module.exports = User;
+module.exports = Users;

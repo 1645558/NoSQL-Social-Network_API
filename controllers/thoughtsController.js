@@ -1,4 +1,4 @@
-const { Thoughts } = require('../models/Thoughts');
+const { Thoughts, Users } = require('../models');
 
 const thoughtController = {
     getThoughts(req, res) {
@@ -19,7 +19,16 @@ const thoughtController = {
     },
     createThought(req, res) {
         Thoughts.create(req.body)
+        .then((_id) => {
+            return Users.findOneAndUpdate({ _id: params.userId}, {$push: { thoughts: _id}}, { new: true });
+        })
+        .then((thoughts) => 
+        !thoughts
+        ? res.status(404).json({ message: 'No thoughts with that ID' })
+        : res.json(thoughts)
+        )
+        .catch((err) => res.status(500).json(err));
     }
-}
+};
 
 module.exports = thoughtController;
