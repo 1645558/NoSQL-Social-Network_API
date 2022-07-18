@@ -1,8 +1,8 @@
-const { Users } = require('../models');
+const { Users, Thoughts } = require('../models');
 
 const userController = {
     getUsers(req, res) {
-        Users.find({})
+        Users.find()
         .populate({path: 'thoughts', select: '-__v'})
         .populate({path: 'friends', select: '-__v'})
         .select('-__v')
@@ -25,7 +25,30 @@ const userController = {
         Users.create(req.body)
         .then((dbUserData) => res.json(dbUserData))
         .catch((err) => res.status(500).json(err));
-    }
+    },
+    updateUser(req, res) {
+        Users.findOneAndUpdate(
+            { _id: req.params.userId },
+            { $set: req.body },
+            { runValidators: true, new: true }
+        )
+        .then((users) => 
+        !users
+        ?res.status(404).json({ message: 'No user with that ID'})
+        : res.json(users)
+        )
+        .catch((err) => res.status(500).json(err));
+    },
+    deleteUser(req, res) {
+        Users.findOneAndRemove({ _id: req.params.userId })
+        .then((users) => 
+        !users
+        ?res.status(404).json({ message: 'No user with that ID'})
+        : Thoughts.deleteMany({ _id: { $in: users.thoughts}})
+        )
+        .then(() => res.json({ message: 'User and associated thoughts deleted'}))
+        .catch((err) => res.status(500).json(err));
+    },
 };
 
 module.exports = userController;
